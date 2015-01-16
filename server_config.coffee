@@ -4,6 +4,7 @@ class Config
     constructor: ->
         @host   = "localhost"
         @port   = 3000
+        @wsPort = 8765
         @dbName = "kompl"
         @dbHost = @host
         @mongo  = "#{ @dbHost }/#{ @dbName }"

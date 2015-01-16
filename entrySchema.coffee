@@ -17,4 +17,8 @@ module.exports = Schema(
             type: String    # White, Exempt, Exception
             required: true
             validate: listTypeValidation
+        created:
+            type: Date
+            required: true
+            default: new Date()
     )
