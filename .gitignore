@@ -3,6 +3,7 @@
 .gulp/
 .rebooted
 .DS_Store
+.idea
 lib-cov
 *.seed
 *.log
