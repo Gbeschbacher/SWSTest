@@ -15,6 +15,7 @@ lib-cov
 *.pyc
 *.bak
 
+dump
 pids
 logs
 results
