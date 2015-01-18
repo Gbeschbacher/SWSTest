@@ -30,6 +30,6 @@ ws.on "message", ( message ) ->
         ++pageCount
         console.log pageCount
         if pageCount is 412
-            console.time "overall"
+            console.timeEnd "overall"
 
 
