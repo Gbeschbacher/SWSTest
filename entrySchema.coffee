@@ -10,10 +10,10 @@ module.exports = Schema(
             type: Number
             required: true
             default: 123456789012
+            index: true
         Kennzeichen:
             type: String
             required: true
-            index: true
         ListType:
             type: String    # White, Exempt, Exception
             required: true

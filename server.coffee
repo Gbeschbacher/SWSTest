@@ -1,12 +1,6 @@
 "use strict"
 
 async = require "async"
-which = require "which"
-fstream = require "fstream"
-tar = require "tar"
-
-zlib  = require "zlib"
-fs    = require "fs"
 
 WebSocketServer = require("ws").Server
 
@@ -18,9 +12,6 @@ entrySchema = require "./entrySchema"
 db = createConnection config
 
 Entry = db.model "Entry", entrySchema
-
-{spawn} = require "child_process"
-
 
 randomNumber = ->
     Math.floor(Math.random()*1000000)+10000000
@@ -39,18 +30,17 @@ on start, verify that following exists:
     20.000      Exception Entries
 takse ~ 70 sec
 ###
+console.time "overall"
+
 totalCbs = 0
 myCb = ( err ) ->
     ++totalCbs
     if totalCbs >= 3
-        console.log "finished!"
         console.timeEnd "overall"
         afterInit()
 
-console.time "overall"
 for type in config.types
     do (type) ->
-        console.log "type", type
         Entry.count ListType: type, (err, count) ->
             if err
                 console.log "db error", err
@@ -103,53 +93,6 @@ for type in config.types
                         return myCb err
 
 afterInit = ->
-    #console.log "finished!!!!"
-    #console.time "dump"
-    #args = ["--db", "kompl", "--collection", "entries"]
-    #mongodump = spawn which.sync("mongodump"), args
-    #mongodump.stdout.on "data", ( data ) ->
-    #    console.log "stdout: " + data
-
-    #mongodump.stderr.on "data", ( data ) ->
-    #    console.log "stderr: " + data
-
-    #mongodump.on "exit", ( code ) ->
-    #    console.log "mongodump exited with code " + code
-    #    console.timeEnd "dump"
-        ###
-        if code is 0
-            console.time "gzip"
-            ##
-            input = fstream.Reader(
-              path: "dump"
-              type: "Directory"
-            )
-            out = fs.createWriteStream("dump.tar.gz")
-
-            # Read the source directory
-            # Convert the directory to a .tar file
-            # Compress the .tar file
-            input.pipe(tar.Pack()).pipe(zlib.Gzip()).pipe out
-            input.on "end", ->
-                console.log "gzip finished?"
-                console.timeEnd "gzip"
-            ##
-
-            args = ["-zcvf", "dump.tar.gz", "./dump"]
-            tar = spawn which.sync("tar"), args
-
-            tar.stdout.on "data", ( data ) ->
-                console.log "stdout: " + data
-
-            tar.stderr.on "data", ( data ) ->
-                console.log "stdout: " + data
-
-            tar.on "exit", (code) ->
-                console.log "tar finished with code: " + code
-                console.timeEnd "gzip"
-        ###
-
-
     wss = new WebSocketServer port: config.wsPort
 
     wss.on "connection", connection = (ws) ->
@@ -163,7 +106,6 @@ afterInit = ->
             pages = 8
 
             if message is "get"
-                console.log "get msg"
                 async.timesSeries pages
                 , (it, cb) ->
                     Entry.find().limit(pageSize).skip(it*pageSize).exec (err, entries) ->
@@ -171,52 +113,34 @@ afterInit = ->
                         cb()
                 , (err) ->
                     if err
-                        console.log "error ", err
 
 
     # get 10 random number plates
-    plates = []
+    obus = []
     rndNumber = ->
         Math.floor(Math.random()*2060000)+1
 
     console.time "10 queries"
-    async.times 10
-    , (it, cb) ->
-        console.log "blubb"
-        Entry.find().limit(1).skip(rndNumber()).exec (err, plate) ->
+    async.times 100 , (it, cb) ->
+        Entry.find().limit(1).skip(rndNumber()).exec (err, obu) ->
             if err
-                console.log "error while getting plate"
+                console.log "error while getting obu"
             else
-                plates.push plate[0].Kennzeichen
+                obus.push obu[0].OBU
             cb()
     , (err) ->
         if err
             console.log "err while getting plates"
         else
-            console.log "got all plates?", plates
-
-        console.time "get plates"
-        async.each plates
-        , (plate, cbi) ->
-            Entry.findOne "Kennzeichen": plate, (err, plate) ->
-                console.log "found", plate.Kennzeichen
-                cbi( err)
-        , (err) ->
-            console.timeEnd "get plates"
+            console.time "get obus"
+            async.each obus, (obu, cbi) ->
+                Entry.findOne "OBU": obu, (err, obu) ->
+                    cbi( err )
+            , (err) ->
+                console.timeEnd "get obus"
 
 
 # 1 --> create mongodb backup ~190MB
 # 2 --> gzip it ~35MB
 # 3 --> md5
 # 4 --> send it over websockets
-
-
-###
-MyModel.find( { createdOn: { $lte: request.createdOnBefore } } )
-.limit( 10 )
-.sort( '-createdOn' )
-        return
-
-    ws.send "something"
-    return
-###
