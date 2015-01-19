@@ -40,7 +40,7 @@ on start, verify that following exists:
 takse ~ 70 sec
 ###
 totalCbs = 0
-cb = ( err ) ->
+myCb = ( err ) ->
     ++totalCbs
     if totalCbs >= 3
         console.log "finished!"
@@ -54,13 +54,13 @@ for type in config.types
         Entry.count ListType: type, (err, count) ->
             if err
                 console.log "db error", err
-                return cb err
+                return myCb err
             else
                 console.log "total #{type}: #{count}"
                 diff = count - config.counts[type.toLowerCase()]
                 console.log "diff #{type}", diff
                 if diff is 0
-                    return cb err
+                    return myCb err
 
                 if diff > 0
                     # delete entrys
@@ -73,7 +73,7 @@ for type in config.types
                                 console.log "error while removing #{type} entries"
                             else
                                 console.log "deleted: #{diff} #{type} entries"
-                            return cb err
+                            return myCb err
                 else
                     diff *= -1
                     console.log "add... #{diff} #{type}"
@@ -100,26 +100,26 @@ for type in config.types
                             console.log "error while inserting"
                         else
                             console.log "finished?"
-                        return cb err
+                        return myCb err
 
 afterInit = ->
-    console.log "finished!!!!"
-    console.time "dump"
-    args = ["--db", "kompl", "--collection", "entries"]
-    mongodump = spawn which.sync("mongodump"), args
-    mongodump.stdout.on "data", ( data ) ->
-        console.log "stdout: " + data
+    #console.log "finished!!!!"
+    #console.time "dump"
+    #args = ["--db", "kompl", "--collection", "entries"]
+    #mongodump = spawn which.sync("mongodump"), args
+    #mongodump.stdout.on "data", ( data ) ->
+    #    console.log "stdout: " + data
 
-    mongodump.stderr.on "data", ( data ) ->
-        console.log "stderr: " + data
+    #mongodump.stderr.on "data", ( data ) ->
+    #    console.log "stderr: " + data
 
-    mongodump.on "exit", ( code ) ->
-        console.log "mongodump exited with code " + code
-        console.timeEnd "dump"
+    #mongodump.on "exit", ( code ) ->
+    #    console.log "mongodump exited with code " + code
+    #    console.timeEnd "dump"
+        ###
         if code is 0
-
             console.time "gzip"
-            ###
+            ##
             input = fstream.Reader(
               path: "dump"
               type: "Directory"
@@ -133,7 +133,7 @@ afterInit = ->
             input.on "end", ->
                 console.log "gzip finished?"
                 console.timeEnd "gzip"
-            ###
+            ##
 
             args = ["-zcvf", "dump.tar.gz", "./dump"]
             tar = spawn which.sync("tar"), args
@@ -147,7 +147,7 @@ afterInit = ->
             tar.on "exit", (code) ->
                 console.log "tar finished with code: " + code
                 console.timeEnd "gzip"
-
+        ###
 
 
     wss = new WebSocketServer port: config.wsPort
@@ -158,8 +158,9 @@ afterInit = ->
             entries = 0
             entries += val for key,val of config.counts
 
+            # 40k entries
             pageSize = 5000
-            pages = entries / pageSize
+            pages = 8
 
             if message is "get"
                 console.log "get msg"
@@ -171,6 +172,38 @@ afterInit = ->
                 , (err) ->
                     if err
                         console.log "error ", err
+
+
+    # get 10 random number plates
+    plates = []
+    rndNumber = ->
+        Math.floor(Math.random()*2060000)+1
+
+    console.time "10 queries"
+    async.times 10
+    , (it, cb) ->
+        console.log "blubb"
+        Entry.find().limit(1).skip(rndNumber()).exec (err, plate) ->
+            if err
+                console.log "error while getting plate"
+            else
+                plates.push plate[0].Kennzeichen
+            cb()
+    , (err) ->
+        if err
+            console.log "err while getting plates"
+        else
+            console.log "got all plates?", plates
+
+        console.time "get plates"
+        async.each plates
+        , (plate, cbi) ->
+            Entry.findOne "Kennzeichen": plate, (err, plate) ->
+                console.log "found", plate.Kennzeichen
+                cbi( err)
+        , (err) ->
+            console.timeEnd "get plates"
+
 
 # 1 --> create mongodb backup ~190MB
 # 2 --> gzip it ~35MB

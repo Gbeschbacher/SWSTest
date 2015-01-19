@@ -13,6 +13,7 @@ module.exports = Schema(
         Kennzeichen:
             type: String
             required: true
+            index: true
         ListType:
             type: String    # White, Exempt, Exception
             required: true
