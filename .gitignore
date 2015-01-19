@@ -3,6 +3,7 @@
 .gulp/
 .rebooted
 .DS_Store
+.idea
 lib-cov
 *.seed
 *.log
@@ -14,6 +15,7 @@ lib-cov
 *.pyc
 *.bak
 
+dump
 pids
 logs
 results
