@@ -41,7 +41,7 @@ async.eachSeries inserts
                 console.log "error while inserting ", err
             console.log "."
             cb err
-    , 5
+    , 1
 , (err) ->
     console.log "stop insert"
 
