@@ -15,9 +15,9 @@
 ## set up db:
 The `server.coffee` automaticaly sets up db, it will create
 
-    * 2.000.000 white
-    * 40.000 exempt
-    * 20.000 exception
+* 2.000.000 white
+* 40.000 exempt
+* 20.000 exception
 
 entries (if there are more entries, it will remove the left over).
 
