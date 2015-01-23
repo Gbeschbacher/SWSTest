@@ -20,16 +20,18 @@ entries += val for key,val of config.counts
 console.time "overall"
 ws.on "message", ( message ) ->
     #console.log "got msg"
-    Entry.collection.insert JSON.parse( message )
-    ,
-        w: 1
-        keepGoing: true
-    , (err) ->
-        if err
-            console.log "error while inserting"
-        ++pageCount
-        console.log pageCount
-        if pageCount is 412
-            console.timeEnd "overall"
-
+    msg = JSON.parse message
+    i = 0
+    while i < msg.length
+        Entry.collection.update _id: msg[i]._id, msg[i]
+        ,
+            w: 1
+            keepGoing: true
+        , (err) ->
+            if err
+                console.log "error while inserting", err
+            ++pageCount
+            if pageCount >= 5000*8
+                console.timeEnd "overall"
+        ++i
 
