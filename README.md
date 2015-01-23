@@ -29,6 +29,7 @@ entries (if there are more entries, it will remove the left over).
     serve file (nginx or similar)
 * on the client:
     `wget -O ./dump.bson.bz2 URL && time tar xvjf ./dump.tar.bz2 && time mongorestore -d kompl_restore ./dump/kompl ` --> takes about 70 seconds
+* in real world: switch db after restoring backup
 
 ## insert 40k entries
 * `coffee obu_insert_40k.coffee`
