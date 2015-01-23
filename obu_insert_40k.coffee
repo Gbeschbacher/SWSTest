@@ -26,7 +26,7 @@ randomString = ->
         ) for i in [1..10]).join ""
 
 inserts = []
-console.log "blubb"
+
 for i in [1..40000]
     inserts.push
         OBU: randomNumber()
