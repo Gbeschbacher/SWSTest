@@ -95,7 +95,7 @@ for type in config.types
 obus = []
 afterInit = ->
     wss = new WebSocketServer port: config.wsPort
-
+    console.log "WebSocketServer started"
     wss.on "connection", connection = (ws) ->
         console.log "new connection"
         ws.on "message", incoming = (message) ->
@@ -116,7 +116,7 @@ afterInit = ->
                     if err
                         console.log "error while getting pages"
 
-
+    ###
     # get 10 random number plates
     rndNumber = ->
         Math.floor(Math.random()*2060000)+1
@@ -140,7 +140,7 @@ afterInit = ->
             , (err) ->
                 console.timeEnd "get obus"
                 #lastTest()
-
+    ###
 lastTest = ->
     inserts = []
     for i in [1..50]
