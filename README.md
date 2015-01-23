@@ -24,11 +24,11 @@ entries (if there are more entries, it will remove the left over).
 
 ## simplest way to copy whole db:
 * on the server:
-    `time mongodump -d kompl -c entries -o dump && tar -cjf dump.tar.bz2 dump/` --> takes about 17 secs, ~28MB Backup
+    `time mongodump -d kompl -c entries -o dump && tar -cjf dump.tar.bz2 dump/` --> takes about 18 secs, ~28MB Backup
 * on the server:
     serve file (nginx or similar)
 * on the client:
-    `wget -O ./dump.bson.bz2 URL && time tar xvjf ./dump.tar.bz2 && mongorestore -d kompl_restore ./dump/kompl` --> takes about 70 seconds
+    `wget -O ./dump.bson.bz2 URL && time tar xvjf ./dump.tar.bz2 && time mongorestore -d kompl_restore ./dump/kompl ` --> takes about 70 seconds
 
 ## insert 40k entries
 * `coffee obu_insert_40k.coffee`
